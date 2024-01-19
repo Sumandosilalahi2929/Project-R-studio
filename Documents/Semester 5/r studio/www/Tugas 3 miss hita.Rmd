@@ -1,0 +1,87 @@
+---
+title: "Tugas 3"
+output: html_document
+date: '2023-01-19'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+library("dplyr")
+library("arules")
+library("arulesViz")
+library("plotly")
+```
+```{r}
+supermarket <- read_csv("supermarket.csv")
+```
+#Mencari 6 data teratas
+```{r}
+head(supermarket)
+```
+#menampilkan tipe dan struktur data pada supermarket
+```{r}
+glimpse(supermarket)
+```
+#menamiplkan deskripsi data
+```{r}
+summary(supermarket)
+```
+#Exploratory Analysis
+#Barang yang paling sering dibeli pelanggan
+
+```{r}
+supermarket %>%
+  count(name,name = "banyak barang",sort = TRUE)
+```
+#barang yang dibeli setiap transaksi
+```{r}
+supermarket %>%
+  select(name,TID)
+```
+#Pertama membuat rules
+```{r}
+supermarket_R <- split(supermarket$name,supermarket$TID)
+head(supermarket_R, 3)
+```
+#mengubah dataset menjadi format transactions menggunakan fungsi as()
+```{r}
+supermarket_transaksi <- as (supermarket_R,"transactions")
+supermarket_transaksi %>%
+  head(3)%>%
+  inspect()
+```
+#membuat rules menggunakan fungsi apriori, anda bisa mengatur parameter supp, dan conf untuk mendapatkan rules yang anda inginkan
+```{r}
+Supermarket_rules <- apriori(data = supermarket_transaksi,parameter = list(supp=0.01, conf = 0.1))
+```
+
+```{r}
+plot(Supermarket_rules,
+     method = "graph",
+     measure ="lift",
+     engine ="htmlwidget" #membuat grafik interaktif
+)
+```
